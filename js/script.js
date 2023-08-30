@@ -1,17 +1,20 @@
-const handleFeatures = async (showAll) => {
+const handleFeatures = async (showAll, isClicked) => {
   const response = await fetch("https://openapi.programming-hero.com/api/ai/tools");
   const data = await response.json();
   // console.log(data.data.tools);
   const item = data.data.tools;
-  displayFeatures(item, showAll);
+  displayFeatures(item, showAll, isClicked);
 };
 
-const displayFeatures = (features, showAll) => {
+const displayFeatures = (features, showAll, isClicked) => {
   const featureField = document.getElementById("feature-field");
   featureField.textContent = "";
 
-  // console.log("object", showAll);
-
+  console.log("click", isClicked);
+  if (isClicked) {
+    features = features.sort((a, b) => new Date(a.published_in) - new Date(b.published_in));
+  }
+  console.log(features);
   const showAllButton = document.getElementById("btn-showall");
 
   if (features.length > 9 && !showAll) {
@@ -26,7 +29,7 @@ const displayFeatures = (features, showAll) => {
     div.classList = `bg-base-100 shadow-none border-2 border-gray-200 rounded-lg`;
     div.innerHTML = `
     <figure class="px-5 pt-5">
-      <img src="${feature.image}" alt="${feature.name}" class="rounded-xl h-[220px]" />
+      <img src="${feature.image}" alt="${feature.name}" class="rounded-xl h-[160px] w-full" />
     </figure>
     <div class="card-body text-left">
       <h2 class="card-title">Features</h2>
@@ -49,6 +52,7 @@ const displayFeatures = (features, showAll) => {
       </div>
     </div>
     `;
+
     featureField.appendChild(div);
   });
 };
@@ -61,28 +65,28 @@ const handleModal = async (id) => {
   const response = await fetch(`https://openapi.programming-hero.com/api/ai/tool/${id}`);
   const data = await response.json();
   const item = data.data;
-  // console.log(id);
+  console.log(id);
   displayModal(item);
 };
 
 const displayModal = (data) => {
-  // console.log(data);
+  console.log(data);
   const modalContainer = document.getElementById("modal-container");
   modalContainer.innerHTML = `
   <dialog id="modal_container" class="modal">
-    <form method="dialog" class="modal-box w-11/12 max-w-6xl p-2 lg:p-6">
+    <form method="dialog" class="modal-box w-10/12 max-w-4xl p-2 lg:p-6">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
       
       <!-- modal card details -->
 
       <div class="flex flex-col-reverse md:flex-row gap-4 p-3 lg:p-8">
         <!-- text details section -->
-        <div class="bg-[#EB57570A] rounded-lg border-2 border-[#EB5757] space-y-4 p-4">
-          <h3 class="font-bold">${data.description}</h3>
+        <div class="bg-[#EB57570A] rounded-lg border-2 border-[#EB5757] space-y-4 p-4 flex-1">
+          <h3 class="font-bold">${data?.description}</h3>
           <div class="font-semibold flex flex-col md:flex-row gap-4 justify-center">
             <div class="text-[#03A30A] bg-white px-2 py-4 rounded-lg text-center">
-              <p>${data.pricing[0]?.price}</p>
-              <p>${data.pricing[0]?.plan}</p>
+              <p>${(data.pricing && data?.pricing[0]?.price) || "Not Available"}</p>
+              <p>${(data.pricing && data?.pricing[0]?.plan) || "Not Available"}</p>
             </div>
             <div class="text-[#F28927] bg-white px-2 py-4 rounded-lg text-center">
               <p>$50/month</p>
@@ -96,30 +100,46 @@ const displayModal = (data) => {
           <div class="flex flex-col md:flex-row gap-4 justify-between">
             <div>
               <h3 class="font-bold">Features</h3>
-              <ul class="pl-6">
-                <li class="list-disc">${data.features["1"]?.feature_name}</li>
-                <li class="list-disc">${data.features["2"]?.feature_name}</li>
-                <li class="list-disc">${data.features["3"]?.feature_name}</li>
+              <ul class="pl-6 list-disc">
+                  ${Object.values(data.features)
+                    .map((item) => `<li>${item.feature_name}</li>`)
+                    .join("")}
               </ul>
             </div>
             <div>
               <h3 class="font-bold">Integrations</h3>
-              <ul class="pl-6">
-                <li class="list-disc">${data.integrations[0] || "Not Available"}</li>
-                <li class="list-disc">${data.integrations[1] || "Not Available"}</li>
-                <li class="list-disc">${data.integrations[1] || "Not Available"}</li>
+              <ul class="pl-6 list-disc">
+                ${
+                  data.integrations
+                    ? Object.values(data.integrations)
+                        .map((item) => `<li>${item}</li>`)
+                        .join("")
+                    : "Not Available"
+                }
               </ul>
             </div>
           </div>
         </div>
 
         <!-- image section -->
-        <div class="border-2 border-gray-200 rounded-lg p-4 relative">
-          <img src='${data.image_link[0]}' class="rounded-lg" alt="image" />
+        <div class="border-2 border-gray-200 rounded-lg p-4 relative flex-1">
+          <img src='${data.image_link[0]}' class="rounded-lg h-[200px] w-full" alt="image" />
           <p class="bg-[#EB5757] px-2 rounded-lg w-28 text-white absolute right-7 top-5">${data.accuracy.score * 100}% accuracy</p>
           <div class="text-center py-4">
-            <h3 class="font-bold">${data.input_output_examples[0]?.input}</h3>
-            <p class="text-center">${data.input_output_examples[0]?.output}</p>
+          ${
+            data.input_output_examples
+              ? data.input_output_examples
+                  .map((item) => {
+                    return `
+                    <div>
+                      <p><strong>${item.input}</strong></p>
+                      <p>${item.output}</p>
+                    </div>
+                  `;
+                  })
+                  .join("")
+              : ""
+          }          
           </div>
         </div>
       </div>
@@ -131,4 +151,10 @@ const displayModal = (data) => {
   modal_container.showModal();
 };
 
+const sortByDate = (isClicked) => {
+  handleFeatures(isClicked, true);
+};
+
 handleFeatures();
+
+// Object.values(obj).map(value=>`<li>${value.feature_name}</li>`)

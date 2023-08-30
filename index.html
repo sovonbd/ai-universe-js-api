@@ -14,7 +14,7 @@
     </header>
     <main>
       <div class="text-center">
-        <button class="btn btn-neutral text-white bg-[#EB5757] border-none normal-case">Sort By Date</button>
+        <button onclick="sortByDate()" class="btn btn-neutral text-white bg-[#EB5757] border-none normal-case">Sort By Date</button>
       </div>
 
       <!-- card section -->
@@ -23,14 +23,12 @@
 
         <!-- modal section -->
         <div id="modal-container"></div>
-        
+
         <!-- show all button -->
         <div id="btn-showall" class="text-center pt-8 hidden">
           <button onclick="displayShowAll()" class="btn btn-neutral normal-case bg-[#EB5757] text-white border-none px-6">Show More</button>
         </div>
       </section>
-
-      
     </main>
 
     <script src="./js/script.js"></script>
