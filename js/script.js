@@ -42,7 +42,7 @@ const displayFeatures = (features, showAll, isClicked, isClickedDec) => {
       </ol>
       <hr class="my-2">
       <div class="flex justify-between items-center">
-        <div class="w-[70%]">
+        <div class="w-[200%]">
           <h3 class="text-black text-xl font-semibold">${feature.name}</h3>
           <p><i class="fa-regular fa-calendar-check"><span class="text-xs pl-2">${feature.published_in}</span></i></p>
         </div>
