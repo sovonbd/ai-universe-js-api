@@ -1,20 +1,22 @@
-const handleFeatures = async (showAll, isClicked) => {
+const handleFeatures = async (showAll, isClickedAsc, isClickedDec) => {
   const response = await fetch("https://openapi.programming-hero.com/api/ai/tools");
   const data = await response.json();
-  // console.log(data.data.tools);
   const item = data.data.tools;
-  displayFeatures(item, showAll, isClicked);
+  displayFeatures(item, showAll, isClickedAsc, isClickedDec);
 };
 
-const displayFeatures = (features, showAll, isClicked) => {
+const displayFeatures = (features, showAll, isClicked, isClickedDec) => {
   const featureField = document.getElementById("feature-field");
   featureField.textContent = "";
 
-  console.log("click", isClicked);
   if (isClicked) {
     features = features.sort((a, b) => new Date(a.published_in) - new Date(b.published_in));
+  } else if (isClickedDec) {
+    features = features.sort((a, b) => new Date(b.published_in) - new Date(a.published_in));
   }
-  console.log(features);
+
+  // console.log("click", showAll);
+
   const showAllButton = document.getElementById("btn-showall");
 
   if (features.length > 9 && !showAll) {
@@ -58,7 +60,7 @@ const displayFeatures = (features, showAll, isClicked) => {
 };
 
 const displayShowAll = () => {
-  handleFeatures(true);
+  handleFeatures(true, false, true);
 };
 
 const handleModal = async (id) => {
@@ -73,9 +75,6 @@ const displayModal = (data) => {
   console.log(data);
   const modalContainer = document.getElementById("modal-container");
   modalContainer.innerHTML = `
-  <dialog id="modal_container" class="modal">
-    <form method="dialog" class="modal-box w-10/12 max-w-4xl p-2 lg:p-6">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
       
       <!-- modal card details -->
 
@@ -123,8 +122,8 @@ const displayModal = (data) => {
 
         <!-- image section -->
         <div class="border-2 border-gray-200 rounded-lg p-4 relative flex-1">
-          <img src='${data.image_link[0]}' class="rounded-lg h-[200px] w-full" alt="image" />
-          <p class="bg-[#EB5757] px-2 rounded-lg w-28 text-white absolute right-7 top-5">${data.accuracy.score * 100}% accuracy</p>
+          <img src='${data.image_link[0]}' class="rounded-lg h-[160px] w-full" alt="image" />
+          <p class="bg-[#EB5757] px-1 rounded-lg w-28 text-xs text-center text-white absolute right-7 top-5">${data.accuracy.score !== null ? `${data.accuracy.score * 100}% accuracy` : ""}</p>
           <div class="text-center py-4">
           ${
             data.input_output_examples
@@ -132,7 +131,7 @@ const displayModal = (data) => {
                   .map((item) => {
                     return `
                     <div>
-                      <p><strong>${item.input}</strong></p>
+                      <p class="p-2"><strong>${item.input}</strong></p>
                       <p>${item.output}</p>
                     </div>
                   `;
@@ -143,18 +142,17 @@ const displayModal = (data) => {
           </div>
         </div>
       </div>
-    </form>
-  </dialog>
   `;
-
-  const modal_container = document.getElementById("modal_container");
   modal_container.showModal();
 };
 
-const sortByDate = (isClicked) => {
-  handleFeatures(isClicked, true);
+const sortByDateAsc = () => {
+  // console.log(isClicked);
+  handleFeatures(false, true, false);
+};
+
+const sortByDateDes = () => {
+  handleFeatures(false, false, true);
 };
 
 handleFeatures();
-
-// Object.values(obj).map(value=>`<li>${value.feature_name}</li>`)
